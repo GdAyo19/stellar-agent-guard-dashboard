@@ -340,8 +340,7 @@ async function pollForInclusion(
   for (let attempt = 0; attempt < attempts; attempt++) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
     const result = (await server.getTransaction(hash).catch(() => null)) as
-      | (rpc.Api.GetTransactionResponse & { diagnosticEventsXdr?: unknown[] })
-      | null;
+      (rpc.Api.GetTransactionResponse & { diagnosticEventsXdr?: unknown[] }) | null;
     if (!result) continue;
     if (result.status === rpc.Api.GetTransactionStatus.SUCCESS) {
       return {
@@ -522,7 +521,7 @@ async function runInvocation(request: InvokeRequest): Promise<InvokeResult> {
   if (request.exportOnly) {
     return {
       kind: "exported",
-      xdr: assembled.transaction.toXDR()
+      xdr: assembled.transaction.toXDR(),
     };
   }
 

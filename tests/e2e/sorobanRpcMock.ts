@@ -487,7 +487,10 @@ function encodeEventValue(spec: MockEventSpec): string {
  * passes through to the Next.js server, and anything else is aborted so a test
  * can never reach an unexpected host.
  */
-export async function installSorobanRpcMock(page: Page, options: MockChainOptions = {}): Promise<SorobanRpcMock> {
+export async function installSorobanRpcMock(
+  page: Page,
+  options: MockChainOptions = {},
+): Promise<SorobanRpcMock> {
   const chain = new SorobanRpcMock(options);
   await page.route("**/*", (route) => {
     const url = new URL(route.request().url());

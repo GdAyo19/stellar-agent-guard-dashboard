@@ -62,7 +62,10 @@ export function toJsonSafe(value: unknown): unknown {
     // Objects that know how to render themselves (SDK `Address`, `Contract`, …)
     // are recorded as their canonical string, not as their internals.
     const ownToString = (value as { toString?: () => string }).toString;
-    if (Object.getPrototypeOf(value) !== Object.prototype && ownToString !== Object.prototype.toString) {
+    if (
+      Object.getPrototypeOf(value) !== Object.prototype &&
+      ownToString !== Object.prototype.toString
+    ) {
       return String(value);
     }
     const out: Record<string, unknown> = {};
@@ -198,10 +201,15 @@ export function telemetryToAuditLog(params: NdjsonExportParams): string {
 }
 
 /** `guard-audit-log-2026-09-25T14-03-07Z.ndjson`: sortable, and safe on every filesystem. */
-export function auditLogFilename(exportedAt: Date = new Date(), scope: "full" | "filtered" = "full"): string {
-  const stamp = exportedAt.toISOString().replace(/\.\d{3}Z$/, "Z").replace(/:/g, "-");
+export function auditLogFilename(
+  exportedAt: Date = new Date(),
+  scope: "full" | "filtered" = "full",
+): string {
+  const stamp = exportedAt
+    .toISOString()
+    .replace(/\.\d{3}Z$/, "Z")
+    .replace(/:/g, "-");
   return `guard-audit-log-${scope === "filtered" ? "filtered-" : ""}${stamp}.ndjson`;
 }
 
 export const NDJSON_MIME = "application/x-ndjson";
-

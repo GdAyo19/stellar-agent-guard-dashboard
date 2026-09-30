@@ -26,9 +26,7 @@ import { Address, xdr } from "@stellar/stellar-sdk";
 async function getSubtleCrypto(): Promise<SubtleCrypto> {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) {
-    throw new Error(
-      "crypto.subtle is unavailable: hashing needs Web Crypto in this runtime",
-    );
+    throw new Error("crypto.subtle is unavailable: hashing needs Web Crypto in this runtime");
   }
   return subtle;
 }

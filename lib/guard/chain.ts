@@ -61,9 +61,7 @@ export async function readContract<T = unknown>(
       fee: "100",
       networkPassphrase: NETWORK.passphrase,
     })
-      .addOperation(
-        Operation.invokeContractFunction({ contract: contractId, function: fn, args }),
-      )
+      .addOperation(Operation.invokeContractFunction({ contract: contractId, function: fn, args }))
       .setTimeout(30)
       .build();
     const simulation = await server.simulateTransaction(tx);
@@ -81,7 +79,11 @@ export async function readContract<T = unknown>(
   }
 }
 
-export function readStatus(server: rpc.Server, guard: string, source?: string): Promise<ReadResult<GuardStatus>> {
+export function readStatus(
+  server: rpc.Server,
+  guard: string,
+  source?: string,
+): Promise<ReadResult<GuardStatus>> {
   return readContract<GuardStatus>(server, guard, "status", [], source);
 }
 
@@ -130,7 +132,10 @@ export interface WindowState {
   entries: Array<{ ts: bigint; amount: bigint }>;
 }
 
-export async function readWindow(server: rpc.Server, guard: string): Promise<ReadResult<WindowState | null>> {
+export async function readWindow(
+  server: rpc.Server,
+  guard: string,
+): Promise<ReadResult<WindowState | null>> {
   const raw = await readPersistentEntry<WindowState>(server, guard, "Window");
   if (!raw.ok) return raw;
   if (raw.value === null || raw.value === undefined) return { ok: true, value: null };

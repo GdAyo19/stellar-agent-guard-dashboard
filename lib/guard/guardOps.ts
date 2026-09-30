@@ -220,8 +220,7 @@ export async function submitOperation(params: {
           result,
         )})`,
         feeStroops,
-        diagnosticEvents:
-          (result as { diagnosticEventsXdr?: unknown[] }).diagnosticEventsXdr ?? [],
+        diagnosticEvents: (result as { diagnosticEventsXdr?: unknown[] }).diagnosticEventsXdr ?? [],
       };
     }
   }
@@ -412,11 +411,10 @@ export async function installPolicy(params: {
   draft: PolicyDraft;
   passphrase?: string;
   exportOnly?: boolean;
-}): Promise<
-  { kind: "invalid"; issues: string[] } | { kind: "invoked"; result: InvokeResult }
-> {
+}): Promise<{ kind: "invalid"; issues: string[] } | { kind: "invoked"; result: InvokeResult }> {
   const built = buildPolicyConfig(params.draft);
-  if (!built.ok) return { kind: "invalid", issues: built.issues.map((i) => `${i.field}: ${i.message}`) };
+  if (!built.ok)
+    return { kind: "invalid", issues: built.issues.map((i) => `${i.field}: ${i.message}`) };
   const result = await invokeWithWallet({
     server: params.server,
     contract: params.guard,

@@ -46,7 +46,10 @@ describe("live ingest", () => {
   });
 
   test("a re-delivered event is not shown twice", () => {
-    const buffer = apply(emptyStreamBuffer(), [[ev(1), ev(2)], [ev(2), ev(1), ev(3)]]);
+    const buffer = apply(emptyStreamBuffer(), [
+      [ev(1), ev(2)],
+      [ev(2), ev(1), ev(3)],
+    ]);
     assert.deepEqual(ledgers(buffer.rows), [3, 1, 2]);
   });
 
@@ -70,11 +73,22 @@ describe("live ingest", () => {
   test("the SDK's event id covers bigint data (a heartbeat's `at`) without throwing", () => {
     // The identity is now the SDK's `guardEventId`, which renders decoded data
     // canonically — bigints included — instead of this console's own key.
-    const max = ev(5, { source: "diagnostic", transactionHash: null, data: { at: 18_446_744_073_709_551_615n } });
+    const max = ev(5, {
+      source: "diagnostic",
+      transactionHash: null,
+      data: { at: 18_446_744_073_709_551_615n },
+    });
     const small = ev(5, { source: "diagnostic", transactionHash: null, data: { at: 1n } });
     assert.ok(max.id.startsWith("diag:"), "a diagnostic id is derived from the event's content");
     assert.notEqual(max.id, small.id, "different decoded data is a different event");
-    assert.equal(max.id, ev(5, { source: "diagnostic", transactionHash: null, data: { at: 18_446_744_073_709_551_615n } }).id);
+    assert.equal(
+      max.id,
+      ev(5, {
+        source: "diagnostic",
+        transactionHash: null,
+        data: { at: 18_446_744_073_709_551_615n },
+      }).id,
+    );
   });
 });
 
@@ -90,7 +104,10 @@ describe("pause queue", () => {
 
   test("duplicates are rejected while paused too: against the rows and within the queue", () => {
     const live = apply(emptyStreamBuffer(), [[ev(1), ev(2)]]);
-    const paused = apply(pauseStream(live), [[ev(2), ev(3)], [ev(3), ev(1), ev(4)]]);
+    const paused = apply(pauseStream(live), [
+      [ev(2), ev(3)],
+      [ev(3), ev(1), ev(4)],
+    ]);
     assert.deepEqual(ledgers(paused.pending), [4, 3]);
   });
 
@@ -102,7 +119,11 @@ describe("pause queue", () => {
   });
 
   test("a long pause keeps the newest queued events and counts what fell off", () => {
-    const paused = apply(pauseStream(emptyStreamBuffer()), [[ev(1)], [ev(2)], [ev(3)], [ev(4)], [ev(5)]], 3);
+    const paused = apply(
+      pauseStream(emptyStreamBuffer()),
+      [[ev(1)], [ev(2)], [ev(3)], [ev(4)], [ev(5)]],
+      3,
+    );
     assert.deepEqual(ledgers(paused.pending), [5, 4, 3]);
     assert.equal(paused.dropped, 2);
     assert.equal(resumeStream(paused, 3).dropped, 0);
@@ -143,8 +164,16 @@ describe("resume reconciliation", () => {
           buffer = ingestEvents(buffer, batch, { limit });
         });
         buffer = resumeStream(buffer, limit);
-        assert.deepEqual(ledgers(buffer.rows), ledgers(unpaused.rows), `pause@${pauseAt} resume@${resumeAt}`);
-        assert.equal(new Set(buffer.rows.map((event) => event.id)).size, buffer.rows.length, "no duplicate rows");
+        assert.deepEqual(
+          ledgers(buffer.rows),
+          ledgers(unpaused.rows),
+          `pause@${pauseAt} resume@${resumeAt}`,
+        );
+        assert.equal(
+          new Set(buffer.rows.map((event) => event.id)).size,
+          buffer.rows.length,
+          "no duplicate rows",
+        );
       }
     }
   });
@@ -225,7 +254,11 @@ describe("with the real poller", () => {
     assert.equal(feed.position().cursor, "cursor-3");
 
     buffer = clearStreamRows(buffer);
-    assert.equal(feed.position().cursor, "cursor-3", "clearing the display leaves the cursor alone");
+    assert.equal(
+      feed.position().cursor,
+      "cursor-3",
+      "clearing the display leaves the cursor alone",
+    );
 
     buffer = resumeStream(buffer);
     buffer = ingestEvents(buffer, (await feed.pollOnce()).events);

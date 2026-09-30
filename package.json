@@ -15,6 +15,8 @@
     "export": "EXPORT_BUILD=true next build",
     "start": "next start",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/unit/*.test.ts",
     "test:e2e": "playwright test tests/e2e",
@@ -42,6 +44,7 @@
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.3.6",
     "jsdom": "^30.1.1",
+    "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^5.9.2"
   }

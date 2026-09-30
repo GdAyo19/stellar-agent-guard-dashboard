@@ -230,7 +230,9 @@ export function MultisigTracker() {
 
           {report.unmatched.length > 0 && (
             <div className="notice">
-              <strong>{report.unmatched.length} signature(s) match no current account signer</strong>
+              <strong>
+                {report.unmatched.length} signature(s) match no current account signer
+              </strong>
               <span className="tiny">
                 The envelope carries signatures whose hint does not match any signer Horizon lists
                 for the source account. The network would not count them either; they may be from

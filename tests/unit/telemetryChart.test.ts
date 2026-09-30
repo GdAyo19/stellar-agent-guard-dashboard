@@ -35,7 +35,11 @@ function event(minutesAgo: number, result: "allowed" | "blocked"): GuardEvent {
     ledger: result === "allowed" ? 1000 + minutesAgo : null,
     ledgerClosedAt: new Date(BUCKET_START + 1_000 - minutesAgo * 60_000).toISOString(),
     transactionHash: null,
-    decision: { result, reason: result === "blocked" ? "per_tx_cap_exceeded" : null, source: "ledger" },
+    decision: {
+      result,
+      reason: result === "blocked" ? "per_tx_cap_exceeded" : null,
+      source: "ledger",
+    },
     data: {},
   });
 }
@@ -43,7 +47,12 @@ function event(minutesAgo: number, result: "allowed" | "blocked"): GuardEvent {
 const bucketSecs = BigInt(BUCKET_START / 1000);
 
 // Three in the current interval (offsets of seconds), one 40 minutes earlier.
-const EVENTS: GuardEvent[] = [event(0, "allowed"), event(0.01, "allowed"), event(0.015, "blocked"), event(40, "allowed")];
+const EVENTS: GuardEvent[] = [
+  event(0, "allowed"),
+  event(0.01, "allowed"),
+  event(0.015, "blocked"),
+  event(40, "allowed"),
+];
 
 // A partial context is enough for the chart.
 const CONTEXT: any = {
@@ -83,7 +92,11 @@ before(async () => {
       react.createElement(
         GuardContext.Provider,
         { value: CONTEXT },
-        react.createElement(GuardEventsContext.Provider, { value: EVENTS }, react.createElement(TelemetryChart)),
+        react.createElement(
+          GuardEventsContext.Provider,
+          { value: EVENTS },
+          react.createElement(TelemetryChart),
+        ),
       ),
     );
   });
@@ -116,7 +129,9 @@ test("passes automated axe-core WCAG 2.1 AA checks with data present", async () 
     rules: { "color-contrast": { enabled: false } },
   });
   assert.deepEqual(
-    results.violations.map((violation) => `${violation.id}: ${violation.nodes[0]?.target.join(" ")}`),
+    results.violations.map(
+      (violation) => `${violation.id}: ${violation.nodes[0]?.target.join(" ")}`,
+    ),
     [],
   );
 });
@@ -133,8 +148,14 @@ test("arrow keys move through intervals and the readout is announced", async () 
   const status = container.querySelector('[role="status"]');
   assert.ok(status);
   await key("End");
-  assert.match(status.textContent ?? "", /2 allowed, 1 blocked, 12,345,678,901,234,567,000 stroops settled/);
-  assert.ok(container.querySelector(".tchart-tip"), "the visual tooltip follows keyboard focus too");
+  assert.match(
+    status.textContent ?? "",
+    /2 allowed, 1 blocked, 12,345,678,901,234,567,000 stroops settled/,
+  );
+  assert.ok(
+    container.querySelector(".tchart-tip"),
+    "the visual tooltip follows keyboard focus too",
+  );
   await key("Home");
   assert.match(status.textContent ?? "", /0 allowed, 0 blocked, 0 stroops/);
   await key("Escape");
@@ -156,7 +177,10 @@ test("hovering a column shows the tooltip with exact counts and stroops", async 
 
 test("the window toggle switches between 1h, 6h and 24h", async () => {
   const buttons = [...container.querySelectorAll<HTMLButtonElement>('[role="group"] button')];
-  assert.deepEqual(buttons.map((button) => button.textContent), ["1h", "6h", "24h"]);
+  assert.deepEqual(
+    buttons.map((button) => button.textContent),
+    ["1h", "6h", "24h"],
+  );
   assert.equal(buttons[0]!.getAttribute("aria-pressed"), "true");
   await act(async () => buttons[2]!.click());
   assert.equal(buttons[2]!.getAttribute("aria-pressed"), "true");

@@ -142,7 +142,10 @@ function heartbeat(options: SpecOptions): MockEventSpec {
  * decisions and 5 heartbeats, interleaved deterministically so filters have
  * something realistic to cut through.
  */
-export function mixedTelemetryEvents(baseLedger = 5_000_000, baseTimeMs = Date.UTC(2026, 0, 1)): MockEventSpec[] {
+export function mixedTelemetryEvents(
+  baseLedger = 5_000_000,
+  baseTimeMs = Date.UTC(2026, 0, 1),
+): MockEventSpec[] {
   const events: MockEventSpec[] = [];
   let blockedUsed = 0;
   for (let index = 0; index < MIXED_FEED_TOTAL; index += 1) {
@@ -167,7 +170,11 @@ export function mixedTelemetryEvents(baseLedger = 5_000_000, baseTimeMs = Date.U
  * A stream of `count` events cycling approved → blocked → heartbeat → approved,
  * for the throughput benchmark in issue #114.
  */
-export function throughputTelemetryEvents(count: number, baseLedger = 6_000_000, baseTimeMs = Date.UTC(2026, 0, 1)): MockEventSpec[] {
+export function throughputTelemetryEvents(
+  count: number,
+  baseLedger = 6_000_000,
+  baseTimeMs = Date.UTC(2026, 0, 1),
+): MockEventSpec[] {
   const events: MockEventSpec[] = [];
   const cycle = [allowed, blocked, heartbeat, allowed] as const;
   for (let index = 0; index < count; index += 1) {

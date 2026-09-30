@@ -13,7 +13,15 @@ const TOKEN = "CDCYDGBGS5AZ5BZS6XY2SK2PHJHSOEGTN3N4INCK34KF6GU2BGC7Z6MB";
 const RECIPIENT = "GAOBCRXTCO4ZCBNHALJUMJJ5JDXNOUZ7U6VZJX4UBTXAHQEO66IPU6PH";
 
 function draft(overrides: Partial<PolicyDraft> = {}): PolicyDraft {
-  return { ...EMPTY_DRAFT, perTxCap: "1000", windowCap: "150", windowSecs: "60", assets: TOKEN, recipients: RECIPIENT, ...overrides };
+  return {
+    ...EMPTY_DRAFT,
+    perTxCap: "1000",
+    windowCap: "150",
+    windowSecs: "60",
+    assets: TOKEN,
+    recipients: RECIPIENT,
+    ...overrides,
+  };
 }
 
 test("a valid draft encodes to the struct the contract decodes", () => {
@@ -99,9 +107,7 @@ test("allowing any recipient removes the lockout warning", () => {
 });
 
 test("protocols parse both the any-function and per-function forms", () => {
-  const built = buildPolicyConfig(
-    draft({ protocols: `${TOKEN}\n${RECIPIENT}:swap,deposit` }),
-  );
+  const built = buildPolicyConfig(draft({ protocols: `${TOKEN}\n${RECIPIENT}:swap,deposit` }));
   assert.equal(built.ok, true);
   if (!built.ok) return;
   assert.deepEqual(built.config.protocols, [

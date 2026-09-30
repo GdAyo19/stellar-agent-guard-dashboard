@@ -7,7 +7,13 @@
  *   node scripts/inspect-instance.ts [--guard C…] [--json]
  */
 
-import { readPolicy, readStatus, readWindow, verifyWasmIdentity, createServer } from "../lib/guard/chain.ts";
+import {
+  readPolicy,
+  readStatus,
+  readWindow,
+  verifyWasmIdentity,
+  createServer,
+} from "../lib/guard/chain.ts";
 import { NETWORK, PHASE1_ARTIFACT } from "../lib/guard/network.ts";
 import { describePolicy, isDeadManFrozen, deadManRemaining } from "stellar-agent-guard-sdk";
 
@@ -95,7 +101,9 @@ async function main(): Promise<void> {
     console.log(`policy              ${describePolicy(policy.value)}`);
     console.log(
       `dead-man remaining  ${
-        status.ok ? String(deadManRemaining(status.value, policy.value)) : "unknown (status unreadable)"
+        status.ok
+          ? String(deadManRemaining(status.value, policy.value))
+          : "unknown (status unreadable)"
       }`,
     );
   }
@@ -105,7 +113,9 @@ async function main(): Promise<void> {
   } else if (window.value === null) {
     console.log(`window              no spend recorded`);
   } else {
-    console.log(`window total        ${window.value.total} across ${window.value.entries.length} entry(ies)`);
+    console.log(
+      `window total        ${window.value.total} across ${window.value.entries.length} entry(ies)`,
+    );
   }
 }
 

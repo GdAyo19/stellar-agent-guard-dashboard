@@ -317,11 +317,16 @@ function isXdrEncodable(value: unknown): value is XdrEncodable {
 /** Raw XDR for one diagnostic event, whether it arrived decoded or as base64. */
 function diagnosticXdr(value: unknown): RawEventXdr | null {
   try {
-    const event =
-      typeof value === "string" ? xdr.DiagnosticEvent.fromXDR(value, "base64") : value;
+    const event = typeof value === "string" ? xdr.DiagnosticEvent.fromXDR(value, "base64") : value;
     if (!(event instanceof xdr.DiagnosticEvent)) {
       return isXdrEncodable(value)
-        ? { eventId: null, topicXdr: [], valueXdr: null, diagnosticEventXdr: value.toXDR("base64"), inSuccessfulContractCall: null }
+        ? {
+            eventId: null,
+            topicXdr: [],
+            valueXdr: null,
+            diagnosticEventXdr: value.toXDR("base64"),
+            inSuccessfulContractCall: null,
+          }
         : null;
     }
     const body = event.event.body.v0;
@@ -414,7 +419,11 @@ export function ingestEvents(
  * not re-suppress events the window displayed, nor re-show ones it did.
  */
 export function historicalBuffer(events: readonly TelemetryEvent[]): StreamBuffer {
-  return { ...emptyStreamBuffer(), rows: [...events], seen: new Set(events.map((event) => event.id)) };
+  return {
+    ...emptyStreamBuffer(),
+    rows: [...events],
+    seen: new Set(events.map((event) => event.id)),
+  };
 }
 
 export function pauseStream(buffer: StreamBuffer): StreamBuffer {
@@ -422,7 +431,10 @@ export function pauseStream(buffer: StreamBuffer): StreamBuffer {
 }
 
 /** Put the queued events on top of the rows, in arrival order, and go live again. */
-export function resumeStream(buffer: StreamBuffer, limit: number = STREAM_BUFFER_LIMIT): StreamBuffer {
+export function resumeStream(
+  buffer: StreamBuffer,
+  limit: number = STREAM_BUFFER_LIMIT,
+): StreamBuffer {
   if (!buffer.paused) return buffer;
   return {
     ...buffer,

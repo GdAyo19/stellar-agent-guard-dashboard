@@ -74,7 +74,9 @@ export const DEMO_INSTANCE: GuardInstance = {
 // ── Demo-mode detection ────────────────────────────────────────────────────
 
 /** `true` when the environment flag is set to an affirmative value. */
-export function demoFlagFromEnv(value: string | undefined = process.env.NEXT_PUBLIC_DEMO_MODE): boolean {
+export function demoFlagFromEnv(
+  value: string | undefined = process.env.NEXT_PUBLIC_DEMO_MODE,
+): boolean {
   return value === "true" || value === "1";
 }
 
@@ -185,7 +187,11 @@ function demoHash(sequence: number): string {
 }
 
 /** The refusal reasons the demo feed cycles through. */
-const DEMO_BLOCKED_REASONS = ["per_tx_cap_exceeded", "recipient_not_allowed", "window_cap_exceeded"] as const;
+const DEMO_BLOCKED_REASONS = [
+  "per_tx_cap_exceeded",
+  "recipient_not_allowed",
+  "window_cap_exceeded",
+] as const;
 
 /**
  * Complete a synthetic event with the SDK's own identity fields.

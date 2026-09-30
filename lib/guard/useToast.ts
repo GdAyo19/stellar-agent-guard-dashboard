@@ -86,9 +86,7 @@ export class ToastStore {
   dispatch(input: DispatchToast): number {
     const id = this.nextId++;
     const duration =
-      input.durationMs !== undefined
-        ? input.durationMs
-        : DEFAULT_DURATION_MS[input.kind];
+      input.durationMs !== undefined ? input.durationMs : DEFAULT_DURATION_MS[input.kind];
     this.toasts = [
       ...this.toasts,
       {
@@ -103,7 +101,7 @@ export class ToastStore {
     if (duration !== null) {
       this.timers.set(
         id,
-        setTimeout(() => this.dismiss(id), duration)
+        setTimeout(() => this.dismiss(id), duration),
       );
     }
     this.enforceCap();
@@ -113,8 +111,7 @@ export class ToastStore {
 
   private enforceCap(): void {
     while (this.toasts.length > MAX_VISIBLE) {
-      const victim =
-        this.toasts.find((t) => t.kind !== "error") ?? this.toasts[0];
+      const victim = this.toasts.find((t) => t.kind !== "error") ?? this.toasts[0];
       if (victim === undefined) break;
       this.dismiss(victim.id);
     }
@@ -148,19 +145,14 @@ export interface UseToast {
 }
 
 export function useToast(store: ToastStore = toastStore): UseToast {
-  const toasts = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot
-  );
+  const toasts = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
   return {
     toasts,
     toast: (input) => store.dispatch(input),
     success: (title, detail) => store.dispatch({ kind: "success", title, detail }),
     warning: (title, detail) => store.dispatch({ kind: "warning", title, detail }),
     info: (title, detail) => store.dispatch({ kind: "info", title, detail }),
-    error: (title, error, detail) =>
-      store.dispatch({ kind: "error", title, detail, error }),
+    error: (title, error, detail) => store.dispatch({ kind: "error", title, detail, error }),
     dismiss: (id) => store.dismiss(id),
     clear: () => store.clear(),
   };
