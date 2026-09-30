@@ -8,7 +8,7 @@
  */
 
 import { Account, Address, Operation, TransactionBuilder, rpc, xdr } from "@stellar/stellar-sdk";
-import type { GuardStatus, PolicyConfig } from "stellar-agent-guard-sdk";
+import { sha256Hex, type GuardStatus, type PolicyConfig } from "stellar-agent-guard-sdk";
 import { NETWORK, PHASE1_ARTIFACT } from "./network.ts";
 import { buildPolicyConfig, type PolicyDraft } from "./policyForm.ts";
 import {
@@ -28,7 +28,7 @@ import {
   type InvokeResult,
   type WalletSigner,
 } from "./submit.ts";
-import { addressToScVal, hexToBytes, sha256Hex } from "./scval.ts";
+import { addressToScVal, hexToBytes } from "./scval.ts";
 import { announce } from "./useAnnounce.ts";
 import { recordTx } from "./txHistory.ts";
 

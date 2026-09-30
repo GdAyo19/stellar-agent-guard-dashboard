@@ -33,7 +33,7 @@ based on `main` @ `b8d1cbe`).
 | 5 | "Client-side operator console … deploy smart accounts, configure spending guardrails, monitor live telemetry, and trigger emergency freezes" | [`app/page.tsx`](../app/page.tsx), [`app/configure/page.tsx`](../app/configure/page.tsx), [`components/PanicPanel.tsx`](../components/PanicPanel.tsx), [`components/TelemetryFeed.tsx`](../components/TelemetryFeed.tsx) | PASS | 2026-09-29 |
 | 6 | "pure client-side Next.js interface for Freighter wallets" | [`lib/guard/wallet.ts`](../lib/guard/wallet.ts), [`lib/guard/walletConnector.ts`](../lib/guard/walletConnector.ts), [`components/WalletBar.tsx`](../components/WalletBar.tsx) | PASS | 2026-09-29 |
 | 7 | "Holds no secrets and has no server component" | No `app/**/route.ts` and no `middleware.ts` in the repo (see §3 existence proof in [`SPEC.md`](../SPEC.md)) | PASS | 2026-09-29 |
-| 8 | "Consumes the SDK as a vendored package tarball" | `package-lock.json` → `node_modules/stellar-agent-guard-sdk` resolves `file:vendor/stellar-agent-guard-sdk-0.1.0.tgz` | PASS | 2026-09-29 |
+| 8 | "Consumes the SDK as a vendored package tarball" | `package-lock.json` → `node_modules/stellar-agent-guard-sdk` resolves `file:vendor/stellar-agent-guard-sdk-0.1.1.tgz` | PASS | 2026-09-30 |
 | 9 | "…pending registry publish authorization" — contradicted the Phase 2 table below it, which states the SDK **is** published to npm | `package.json` `description`/`version`, Phase 2 table row "SDK published to npm — **met**" | **FIXED** | 2026-09-29 |
 
 ## 2. Phase 2 exit-status table and "Verified against live testnet" table

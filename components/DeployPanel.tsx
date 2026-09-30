@@ -16,7 +16,7 @@ import type { ArtifactCheck, DeployOutcome, DeployPlan } from "../lib/guard/guar
 import type { InvokeResult } from "../lib/guard/submit.ts";
 import { NETWORK, PHASE1_ARTIFACT } from "../lib/guard/network.ts";
 import { fetchContractWasm, verifyWasmIdentity } from "../lib/guard/chain.ts";
-import { bytesToHex } from "../lib/guard/scval.ts";
+import { toHex } from "stellar-agent-guard-sdk";
 import { validateInitParameters, type InitValidation } from "../lib/guard/initValidator.ts";
 import {
   contractAlreadyDeployed,
@@ -154,7 +154,7 @@ export function DeployPanel() {
     };
   }, [fetchArtifact, applyArtifact]);
 
-  const planKey = wallet ? `${wallet.address}:${bytesToHex(salt)}` : "";
+  const planKey = wallet ? `${wallet.address}:${toHex(salt)}` : "";
   const plan = planFor?.key === planKey ? planFor.plan : null;
 
   useEffect(() => {

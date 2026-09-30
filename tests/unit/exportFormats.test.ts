@@ -19,6 +19,7 @@ import {
   refusedEventsFromDiagnostics,
   type TelemetryEvent,
 } from "../../lib/guard/telemetry.ts";
+import { withIdentity } from "../mocks/eventFixtures.ts";
 
 const GUARD = "CAYJZT4XH5SWDXNR7MZJCCUBIDAT2KZDDUTZ7OZQEMKCPJGD4P3X4CU7";
 const ADMIN = Keypair.fromRawEd25519Seed(new Uint8Array(32).fill(1)).publicKey();
@@ -27,7 +28,7 @@ const U64_MAX = 18_446_744_073_709_551_615n;
 const I128_BIG = 170_141_183_460_469_231_731_687_303_715_884_105_727n;
 
 function event(overrides: Partial<TelemetryEvent> = {}): TelemetryEvent {
-  return {
+  return withIdentity({
     kind: "auth_checked",
     topic: "event_auth_checked",
     source: "ledger",
@@ -38,7 +39,7 @@ function event(overrides: Partial<TelemetryEvent> = {}): TelemetryEvent {
     decision: { result: "allowed", reason: null, source: "ledger" },
     data: {},
     ...overrides,
-  };
+  });
 }
 
 const sym = (name: string) => xdr.ScVal.scvSymbol(name);
@@ -252,7 +253,7 @@ describe("raw XDR capture", () => {
   }
 
   function decoded(ledger: number, topic: string, kind: GuardEvent["kind"]): GuardEvent {
-    return {
+    return withIdentity({
       kind,
       topic,
       source: "ledger",
@@ -262,7 +263,7 @@ describe("raw XDR capture", () => {
       transactionHash: TX,
       decision: null,
       data: {},
-    };
+    });
   }
 
   test("pairs decoded ledger events with their raw page, skipping ones the SDK dropped", () => {

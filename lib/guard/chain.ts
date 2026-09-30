@@ -20,8 +20,14 @@ import {
   type xdr as Xdr,
 } from "@stellar/stellar-sdk";
 import { NETWORK, PHASE1_ARTIFACT, READ_SOURCE_FALLBACK } from "./network.ts";
-import { bytesToHex, guardStorageLedgerKeys, hashToHex, sha256, sha256Hex } from "./scval.ts";
-import type { GuardStatus, PolicyConfig } from "stellar-agent-guard-sdk";
+import { guardStorageLedgerKeys, hashToHex, sha256 } from "./scval.ts";
+import {
+  decodePolicy,
+  readPersistentEntry as readLedgerEntry,
+  sha256Hex,
+  type GuardStatus,
+  type PolicyConfig,
+} from "stellar-agent-guard-sdk";
 
 export function createServer(rpcUrl: string = NETWORK.rpcUrl): rpc.Server {
   return new rpc.Server(rpcUrl);
@@ -36,6 +42,10 @@ export type ReadResult<T> = { ok: true; value: T } | { ok: false; error: string 
  * Uses `Operation.invokeContractFunction` with pre-encoded `ScVal` arguments
  * rather than a spec-typed `Contract.call`, so a struct argument (the policy)
  * crosses the boundary exactly as `policyToScVal` built it.
+ *
+ * `decode` defaults to `scValToNative` — a struct caller with no SDK decoder of
+ * its own — and a caller that has one passes it instead, so the decoding rule
+ * lives with the type it belongs to rather than being re-stated here.
  */
 export async function readContract<T = unknown>(
   server: rpc.Server,
@@ -43,6 +53,7 @@ export async function readContract<T = unknown>(
   fn: string,
   args: Xdr.ScVal[] = [],
   source: string = READ_SOURCE_FALLBACK,
+  decode: (retval: Xdr.ScVal) => T = (retval) => scValToNative(retval) as T,
 ): Promise<ReadResult<T>> {
   try {
     const account = new Account(source, "0");
@@ -64,7 +75,7 @@ export async function readContract<T = unknown>(
     if (retval === undefined) {
       return { ok: false, error: `simulation of ${fn}() returned no value` };
     }
-    return { ok: true, value: scValToNative(retval) as T };
+    return { ok: true, value: decode(retval) };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : String(error) };
   }
@@ -74,45 +85,40 @@ export function readStatus(server: rpc.Server, guard: string, source?: string): 
   return readContract<GuardStatus>(server, guard, "status", [], source);
 }
 
-/** The installed policy, or `null` for the contract's default-deny state. */
+/**
+ * The installed policy, or `null` for the contract's default-deny state.
+ *
+ * The retval goes through the SDK's `decodePolicy` — the same strict decoder the
+ * SDK validates policy XDR with — rather than an unchecked native cast that
+ * would hand the console a half-filled object. The one shape kept here is the
+ * console's own: default-deny reads as `null`, not as a failed read.
+ */
 export function readPolicy(
   server: rpc.Server,
   guard: string,
   source?: string,
 ): Promise<ReadResult<PolicyConfig | null>> {
-  return readContract<PolicyConfig | null>(server, guard, "policy", [], source);
+  return readContract<PolicyConfig | null>(server, guard, "policy", [], source, (retval) =>
+    retval.type === "scvVoid" ? null : decodePolicy(retval),
+  );
 }
 
-/** One of the guard's own persistent storage entries (e.g. the rolling `Window`). */
+/**
+ * One of the guard's own persistent storage entries (e.g. the rolling `Window`).
+ *
+ * The ledger-entry lookup and its decode belong to the SDK's
+ * `readPersistentEntry`; the only thing this wrapper adds is the console's
+ * `ReadResult` shape, because every read surface here reports success-or-error
+ * instead of throwing at the caller.
+ */
 export async function readPersistentEntry<T = unknown>(
   server: rpc.Server,
   contractId: string,
   dataKeyName: string,
 ): Promise<ReadResult<T | null>> {
   try {
-    const key = xdr.LedgerKey.contractData(
-      new xdr.LedgerKeyContractData({
-        contract: new Address(contractId).toScAddress(),
-        key: xdr.ScVal.scvVec([xdr.ScVal.scvSymbol(dataKeyName)]),
-        durability: xdr.ContractDataDurability.persistent,
-      }),
-    );
-    const response = await server.getLedgerEntries(key);
-    const entry = response.entries[0] as unknown as {
-      val?: { contractData?: { val?: Xdr.ScVal } | (() => { val?: () => Xdr.ScVal }) };
-    } | undefined;
-    if (!entry?.val) return { ok: true, value: null };
-    // The decoded XDR wrapper exposes `contractData` as a plain property in this
-    // SDK build, but keep the callable shape working too rather than pinning to
-    // one internal representation.
-    const contractData =
-      typeof entry.val.contractData === "function"
-        ? entry.val.contractData()
-        : entry.val.contractData;
-    const scval =
-      typeof contractData?.val === "function" ? contractData.val() : contractData?.val;
-    if (!scval) return { ok: true, value: null };
-    return { ok: true, value: scValToNative(scval) as T };
+    const entry = await readLedgerEntry(server, contractId, dataKeyName);
+    return { ok: true, value: (entry?.value ?? null) as T | null };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : String(error) };
   }
@@ -248,7 +254,6 @@ export function pinnedArtifact() {
   return { ...PHASE1_ARTIFACT };
 }
 
-export { bytesToHex };
 export { stringifyError };
 
 function stringifyError(error: unknown): string {

@@ -13,12 +13,13 @@ import {
   formatStroops,
   type ChartWindow,
 } from "../../lib/guard/telemetryAggregator.ts";
+import { withIdentity } from "../mocks/eventFixtures.ts";
 
 const MIN = 60_000;
 const HOUR = 60 * MIN;
 
 function decision(at: string | null, result: "allowed" | "blocked" | null): GuardEvent {
-  return {
+  return withIdentity({
     kind: result ? "auth_checked" : "heartbeat",
     topic: result ? "event_auth_checked" : "event_heartbeat",
     source: result === "blocked" ? "diagnostic" : "ledger",
@@ -28,7 +29,7 @@ function decision(at: string | null, result: "allowed" | "blocked" | null): Guar
     transactionHash: null,
     decision: result ? { result, reason: result === "blocked" ? "admin_frozen" : null, source: "ledger" } : null,
     data: {},
-  };
+  });
 }
 
 const at = (iso: string) => decision(iso, "allowed");

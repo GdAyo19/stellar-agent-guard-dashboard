@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { scValToNative } from "@stellar/stellar-sdk";
+import { decodePolicy } from "stellar-agent-guard-sdk";
 import {
   EMPTY_DRAFT,
   buildPolicyConfig,
@@ -21,18 +21,19 @@ test("a valid draft encodes to the struct the contract decodes", () => {
   assert.equal(built.ok, true);
   if (!built.ok) return;
 
-  // Round-tripping through the SDK's own decoder is the real check: the host
-  // decodes a `#[contracttype]` struct the same way, so if `scValToNative` reads
-  // back the policy we described, the encoding is the one the contract expects.
-  const decoded = scValToNative(built.scval) as Record<string, unknown>;
-  assert.equal(decoded["per_tx_cap"], 1000n);
-  assert.equal(decoded["window_cap"], 150n);
-  assert.equal(decoded["window_secs"], 60n);
-  assert.deepEqual(decoded["assets"], [TOKEN]);
-  assert.deepEqual(decoded["recipients"], [RECIPIENT]);
-  assert.equal(decoded["allow_any_recipient"], false);
-  assert.equal(decoded["paused"], false);
-  assert.deepEqual(decoded["protocols"], []);
+  // Round-tripping through the SDK's own decoder is the real check: `decodePolicy`
+  // is the strict inverse of the encoder and rejects anything a `#[contracttype]`
+  // struct would not decode, so if it reads back the policy we described, the
+  // encoding is the one the contract expects.
+  const decoded = decodePolicy(built.scval);
+  assert.equal(decoded.per_tx_cap, 1000n);
+  assert.equal(decoded.window_cap, 150n);
+  assert.equal(decoded.window_secs, 60n);
+  assert.deepEqual(decoded.assets, [TOKEN]);
+  assert.deepEqual(decoded.recipients, [RECIPIENT]);
+  assert.equal(decoded.allow_any_recipient, false);
+  assert.equal(decoded.paused, false);
+  assert.deepEqual(decoded.protocols, []);
 });
 
 test("caps larger than Number can represent survive encoding exactly", () => {
@@ -42,8 +43,8 @@ test("caps larger than Number can represent survive encoding exactly", () => {
   const built = buildPolicyConfig(draft({ perTxCap: huge }));
   assert.equal(built.ok, true);
   if (!built.ok) return;
-  const decoded = scValToNative(built.scval) as Record<string, unknown>;
-  assert.equal(decoded["per_tx_cap"], 170141183460469231731687303715884105727n);
+  const decoded = decodePolicy(built.scval);
+  assert.equal(decoded.per_tx_cap, 170141183460469231731687303715884105727n);
 });
 
 test("blank cap fields mean disabled, not zero-valued", () => {

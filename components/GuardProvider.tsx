@@ -33,7 +33,6 @@ import {
   GuardFeed,
   clearStreamRows,
   emptyStreamBuffer,
-  eventKey,
   historicalBuffer,
   ingestEvents,
   pauseStream as pauseBuffer,
@@ -827,4 +826,4 @@ export function useGuardEvents(): TelemetryEvent[] {
   return value;
 }
 
-export { eventKey, GuardContext, GuardEventsContext };
+export { GuardContext, GuardEventsContext };

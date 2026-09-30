@@ -13,10 +13,11 @@
  * deploy will produce", and those are exactly the kind of definitions that drift.
  */
 
+import { toHex } from "stellar-agent-guard-sdk";
 import { StrKey } from "@stellar/stellar-sdk";
 import { predictContractId } from "./chain.ts";
 import { SALT_BYTES } from "./network.ts";
-import { bytesToHex, hexToBytes } from "./scval.ts";
+import { hexToBytes } from "./scval.ts";
 
 export type SaltEncoding = "hex" | "utf8";
 
@@ -91,7 +92,7 @@ export function parseSalt(raw: string, encoding: SaltEncoding): SaltParse {
 
 /** The salt as lowercase hex, for display and for the address preview key. */
 export function formatSalt(bytes: Uint8Array): string {
-  return bytesToHex(bytes);
+  return toHex(bytes);
 }
 
 export type AddressPreview = { ok: true; address: string } | { ok: false; message: string };

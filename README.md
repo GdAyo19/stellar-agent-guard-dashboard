@@ -25,18 +25,20 @@
 
 An autonomous agent holding a wallet has a single point of failure: one prompt-injection or one buggy loop can drain it. Stellar Agent Guard makes that impossible on-chain — the agent's funds stay in its own smart account, and *every* transaction the account must authorize is intercepted by the contract's `__check_auth` and rejected pre-broadcast unless it satisfies the operator's installed policy: per-transaction spend caps, a rolling-window spend limit, recipient/asset allowlists, protocol allowlists, a pause switch, and a dead-man switch. This dashboard provides the operator's command console: a pure client-side Next.js interface for Freighter wallets to inspect guard status, deploy and configure account-level spending policies via a no-code form, view live event telemetry, and execute immediate panic-button freezes confirmed directly from the contract.
 
-**Status: Phase 3 built, with Phase 2 publish status honestly disclosed.** Pure consumer of [stellar-agent-guard-sdk](https://github.com/aigbagbobila/stellar-agent-guard-sdk) and Soroban RPC. Holds no secrets and has no server component: every write is signed by the operator's own wallet and broadcast directly to Soroban RPC. Consumes the SDK from a committed vendored tarball (`vendor/stellar-agent-guard-sdk-0.1.0.tgz`) so CI and offline builds resolve the exact, reviewable bytes; version 0.1.0 of the package is also published to npm (see the Phase 2 table below).
+**Status: Phase 3 built, with Phase 2 publish status honestly disclosed.** Pure consumer of [stellar-agent-guard-sdk](https://github.com/aigbagbobila/stellar-agent-guard-sdk) and Soroban RPC. Holds no secrets and has no server component: every write is signed by the operator's own wallet and broadcast directly to Soroban RPC. Consumes the SDK from a committed vendored tarball (`vendor/stellar-agent-guard-sdk-0.1.1.tgz`, built from the SDK's `main`) so CI and offline builds resolve the exact, reviewable bytes; version 0.1.0 of the package is also published to npm, while the vendored 0.1.1 is not yet published (see the Phase 2 table below).
+
+> **SDK sequence note (2026-09-30).** The vendored tarball moved `0.1.0 → 0.1.1`, built from SDK `main` commit `391546173c40b6c772872fc84c3c84ce42c3147f` (`npm ci && npm run build && npm pack` in the SDK repo). That release is what carries `decodePolicy` / `readPersistentEntry`, which this console's read side now calls; `0.1.1` is not yet published to npm, so the committed tarball — not the registry — is the source of truth for the bytes this build decodes.
 
 > ### Phase 2 Exit Status & Dependency Disclosure
 >
 > | Phase 2 exit criterion | State |
 > | --- | --- |
-> | SDK published to npm | **met** — `npm view stellar-agent-guard-sdk` returns version 0.1.0 |
+> | SDK published to npm | **met for 0.1.0** — `npm view stellar-agent-guard-sdk` returns version 0.1.0; the vendored 0.1.1 (sequence note above) is ahead of the registry |
 > | CI green on `main` | **met** — merged and CI green on `main` (GitHub Actions run `35063436332` passed) |
 > | Real integration tests against testnet | **met** — `tests/fixtures/integration-evidence.md` in SDK repo, 5/5 live |
 > | Phase 2 merged | **met** — PR #2 merged into `main` (commit `897708a`) |
 >
-> **What this means in practice:** The SDK publish criterion is satisfied. Everything claimed about Phase 1 and Phase 3 — the artifact deployed, the policy installed, the freeze confirmed — is proven against real public testnet deployments.
+> **What this means in practice:** The SDK publish criterion is satisfied. This console now vendors 0.1.1, built from the SDK's `main` ahead of its registry publish, so the vendored tarball — not npm — is the source of truth for what this build decodes. Everything claimed about Phase 1 and Phase 3 — the artifact deployed, the policy installed, the freeze confirmed — is proven against real public testnet deployments.
 >
 > ```bash
 > $ npm view stellar-agent-guard-sdk

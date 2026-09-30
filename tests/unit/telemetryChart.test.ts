@@ -9,6 +9,7 @@ import { after, before, test } from "node:test";
 import type axeCore from "axe-core";
 import type { GuardEvent } from "stellar-agent-guard-sdk";
 import { installDom, loadReact, sleep, type Act } from "./domHarness.ts";
+import { withIdentity } from "../mocks/eventFixtures.ts";
 import { TelemetryChart } from "../../components/TelemetryChart.tsx";
 import { GuardContext, GuardEventsContext } from "../../components/GuardProvider.tsx";
 
@@ -26,7 +27,7 @@ const GUARD = "CAYJZT4XH5SWDXNR7MZJCCUBIDAT2KZDDUTZ7OZQEMKCPJGD4P3X4CU7";
 const BUCKET_START = Math.floor(Date.now() / 300_000) * 300_000;
 
 function event(minutesAgo: number, result: "allowed" | "blocked"): GuardEvent {
-  return {
+  return withIdentity({
     kind: "auth_checked",
     topic: "event_auth_checked",
     source: result === "allowed" ? "ledger" : "diagnostic",
@@ -36,7 +37,7 @@ function event(minutesAgo: number, result: "allowed" | "blocked"): GuardEvent {
     transactionHash: null,
     decision: { result, reason: result === "blocked" ? "per_tx_cap_exceeded" : null, source: "ledger" },
     data: {},
-  };
+  });
 }
 
 const bucketSecs = BigInt(BUCKET_START / 1000);

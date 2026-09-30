@@ -4,7 +4,7 @@ import { memo, useState } from "react";
 import { describeGuardEvent, explainReason, GUARD_EVENT_TOPICS } from "stellar-agent-guard-sdk";
 import type { GuardEvent } from "stellar-agent-guard-sdk";
 import { STREAM_BUFFER_LIMIT } from "../lib/guard/telemetry.ts";
-import { eventKey, useGuard, useGuardEvents } from "./GuardProvider.tsx";
+import { useGuard, useGuardEvents } from "./GuardProvider.tsx";
 import { TelemetryAlerts } from "./TelemetryAlerts.tsx";
 import { TelemetryChart } from "./TelemetryChart.tsx";
 import { ErrorBlock, relativeTime, short, starLink } from "./bits.tsx";
@@ -320,7 +320,7 @@ export function TelemetryFeed() {
             </thead>
             <tbody>
               {rows.map((event) => (
-                <TelemetryRow key={eventKey(event)} event={event} />
+                <TelemetryRow key={event.id} event={event} />
               ))}
             </tbody>
           </table>
@@ -347,8 +347,8 @@ export function TelemetryFeed() {
  * cap — the difference between holding frame rate and remounting the table on
  * every update.
  *
- * The key is `eventKey`, the provider's own identity for de-duplication, so
- * React reconciles against the same uniqueness the feed guarantees: a new
+ * The key is the SDK's `event.id`, the same identity the feed de-duplicates
+ * on, so React reconciles against the same uniqueness the feed guarantees: a new
  * event prepending shifts nothing, and no row is ever unmounted and rebuilt
  * merely because rows above it changed.
  */

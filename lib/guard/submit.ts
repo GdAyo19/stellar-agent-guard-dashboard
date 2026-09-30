@@ -24,7 +24,7 @@ import {
   xdr,
 } from "@stellar/stellar-sdk";
 import { NETWORK } from "./network.ts";
-import { bytesToHex, guardStorageLedgerKeys, ledgerKeyId } from "./scval.ts";
+import { guardStorageLedgerKeys, ledgerKeyId } from "./scval.ts";
 import { stringifyError } from "./chain.ts";
 import { announce } from "./useAnnounce.ts";
 import { recordTx } from "./txHistory.ts";

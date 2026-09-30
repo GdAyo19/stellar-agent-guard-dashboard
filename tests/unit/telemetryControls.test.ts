@@ -7,18 +7,18 @@ import {
   STREAM_BUFFER_LIMIT,
   clearStreamRows,
   emptyStreamBuffer,
-  eventKey,
   ingestEvents,
   pauseStream,
   resumeStream,
   type StreamBuffer,
 } from "../../lib/guard/telemetry.ts";
+import { withIdentity } from "../mocks/eventFixtures.ts";
 
 const GUARD = "CAYJZT4XH5SWDXNR7MZJCCUBIDAT2KZDDUTZ7OZQEMKCPJGD4P3X4CU7";
 
 /** A distinct committed event per ledger number. */
 function ev(ledger: number, overrides: Partial<GuardEvent> = {}): GuardEvent {
-  return {
+  return withIdentity({
     kind: "heartbeat",
     topic: "event_heartbeat",
     source: "ledger",
@@ -29,7 +29,7 @@ function ev(ledger: number, overrides: Partial<GuardEvent> = {}): GuardEvent {
     decision: null,
     data: { at: BigInt(ledger) },
     ...overrides,
-  };
+  });
 }
 
 const ledgers = (events: readonly GuardEvent[]) => events.map((event) => event.ledger);
@@ -67,9 +67,14 @@ describe("live ingest", () => {
     assert.equal(buffer.rows.length, 2);
   });
 
-  test("eventKey handles bigint data (a heartbeat's `at`) without throwing", () => {
-    assert.match(eventKey(ev(5, { data: { at: 18_446_744_073_709_551_615n } })), /18446744073709551615n/);
-    assert.notEqual(eventKey(ev(5, { data: { at: 1n } })), eventKey(ev(5, { data: { at: 1 } })));
+  test("the SDK's event id covers bigint data (a heartbeat's `at`) without throwing", () => {
+    // The identity is now the SDK's `guardEventId`, which renders decoded data
+    // canonically — bigints included — instead of this console's own key.
+    const max = ev(5, { source: "diagnostic", transactionHash: null, data: { at: 18_446_744_073_709_551_615n } });
+    const small = ev(5, { source: "diagnostic", transactionHash: null, data: { at: 1n } });
+    assert.ok(max.id.startsWith("diag:"), "a diagnostic id is derived from the event's content");
+    assert.notEqual(max.id, small.id, "different decoded data is a different event");
+    assert.equal(max.id, ev(5, { source: "diagnostic", transactionHash: null, data: { at: 18_446_744_073_709_551_615n } }).id);
   });
 });
 
@@ -139,7 +144,7 @@ describe("resume reconciliation", () => {
         });
         buffer = resumeStream(buffer, limit);
         assert.deepEqual(ledgers(buffer.rows), ledgers(unpaused.rows), `pause@${pauseAt} resume@${resumeAt}`);
-        assert.equal(new Set(buffer.rows.map(eventKey)).size, buffer.rows.length, "no duplicate rows");
+        assert.equal(new Set(buffer.rows.map((event) => event.id)).size, buffer.rows.length, "no duplicate rows");
       }
     }
   });

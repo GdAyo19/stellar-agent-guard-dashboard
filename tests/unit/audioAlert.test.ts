@@ -26,6 +26,7 @@ import {
   type NotificationApi,
   type OscillatorLike,
 } from "../../lib/guard/audioAlert.ts";
+import { withIdentity } from "../mocks/eventFixtures.ts";
 
 /**
  * Alerting is the one feature here that interrupts a human being, so the tests
@@ -35,7 +36,7 @@ import {
  */
 
 function event(overrides: Partial<GuardEvent> = {}): GuardEvent {
-  return {
+  return withIdentity({
     kind: "auth_checked",
     topic: "event_auth_checked",
     source: "ledger",
@@ -46,7 +47,7 @@ function event(overrides: Partial<GuardEvent> = {}): GuardEvent {
     decision: { result: "allowed", reason: null, source: "ledger" },
     data: {},
     ...overrides,
-  };
+  });
 }
 
 // ── A fake AudioContext that records exactly what was scheduled ────────────
@@ -126,7 +127,7 @@ function fakeNotificationApi(
 describe("alert condition matching", () => {
   it("sounds for a blocked decision, which is the case the operator must not miss", () => {
     assert.equal(
-      alertReasonFor(event({ decision: { result: "blocked", reason: "cap_exceeded", source: "diagnostic" } })),
+      alertReasonFor(event({ decision: { result: "blocked", reason: "per_tx_cap_exceeded", source: "diagnostic" } })),
       "blocked",
     );
     assert.equal(isSecurityCritical(event({ decision: { result: "blocked", reason: null, source: "ledger" } })), true);
@@ -269,12 +270,12 @@ describe("notification payload generation", () => {
 
   it("names the refusal and the guard, so a notification on its own is actionable", () => {
     const payload = buildNotificationPayload(
-      event({ decision: { result: "blocked", reason: "cap_exceeded", source: "diagnostic" } }),
+      event({ decision: { result: "blocked", reason: "per_tx_cap_exceeded", source: "diagnostic" } }),
       GUARD,
     );
     assert.ok(payload);
     assert.equal(payload.title, "Agent Guard: transfer blocked");
-    assert.match(payload.body, /refused a call \(cap_exceeded\)/);
+    assert.match(payload.body, /refused a call \(per_tx_cap_exceeded\)/);
     assert.ok(payload.body.includes(GUARD.slice(0, 6)), "the guard is identified, not just described");
     assert.equal(payload.tag, "agent-guard-blocked", "a stable tag collapses repeats into one notification");
     assert.equal(payload.requireInteraction, true);
@@ -371,7 +372,7 @@ describe("not re-alerting on an event that was already announced", () => {
   it("keys on the decision, not only the topic", () => {
     const tracker = createAlertTracker();
     const first = event({ ledger: 1, decision: { result: "allowed", reason: null, source: "ledger" } });
-    const second = event({ ledger: 1, decision: { result: "blocked", reason: "cap_exceeded", source: "ledger" } });
+    const second = event({ ledger: 1, decision: { result: "blocked", reason: "per_tx_cap_exceeded", source: "ledger" } });
     assert.equal(tracker.unseen([first, second]).length, 2);
   });
 
