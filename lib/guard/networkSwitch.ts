@@ -237,7 +237,7 @@ export async function requestFreighterNetworkSwitch(options: {
       kind: "declined",
       message: `Freighter is still on ${networkDisplayName({
         passphrase,
-        name: details.network,
+        ...(details.network !== undefined ? { name: details.network } : {}),
       })}. The switch request was not approved.`,
     };
   } catch (error) {

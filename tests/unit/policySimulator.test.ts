@@ -311,7 +311,6 @@ test("events with no resolvable timestamp fall back to the simulation clock", ()
   const event: TelemetryEvent = {
     ...authEvent({ amount: 10n }),
     ledgerClosedAt: null,
-    observedAt: null,
   };
   const result = simulatePolicy([event], policy(), { now: NOW });
 

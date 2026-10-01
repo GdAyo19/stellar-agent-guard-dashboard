@@ -120,8 +120,29 @@ export async function readPersistentEntry<T = unknown>(
   dataKeyName: string,
 ): Promise<ReadResult<T | null>> {
   try {
-    const entry = await readLedgerEntry(server, contractId, dataKeyName);
-    return { ok: true, value: (entry?.value ?? null) as T | null };
+    const key = xdr.LedgerKey.contractData(
+      new xdr.LedgerKeyContractData({
+        contract: new Address(contractId).toScAddress(),
+        key: xdr.ScVal.scvVec([xdr.ScVal.scvSymbol(dataKeyName)]),
+        durability: xdr.ContractDataDurability.persistent,
+      }),
+    );
+    const response = await server.getLedgerEntries(key);
+    const entry = response.entries?.[0] as unknown as {
+      val?: { contractData?: { val?: Xdr.ScVal } | (() => { val?: () => Xdr.ScVal }) };
+    } | undefined;
+    if (!entry?.val) return { ok: true, value: null };
+    // The decoded XDR wrapper exposes `contractData` as a plain property in this
+    // SDK build, but keep the callable shape working too rather than pinning to
+    // one internal representation.
+    const contractData =
+      typeof entry.val.contractData === "function"
+        ? entry.val.contractData()
+        : entry.val.contractData;
+    const scval =
+      typeof contractData?.val === "function" ? contractData.val() : contractData?.val;
+    if (!scval) return { ok: true, value: null };
+    return { ok: true, value: scValToNative(scval) as T };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : String(error) };
   }

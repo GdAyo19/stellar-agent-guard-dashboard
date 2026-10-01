@@ -33,8 +33,8 @@ export function parseAddressList(csv: string): ParsedAddress[] {
     if (!isValidGAddress(address) && !isValidCAddress(address)) {
       results.push({
         address,
-        symbol,
-        description,
+        ...(symbol !== undefined && { symbol }),
+        ...(description !== undefined && { description }),
         row,
         error: `Row ${row}: invalid Stellar address "${address}"`,
       });
@@ -44,8 +44,8 @@ export function parseAddressList(csv: string): ParsedAddress[] {
     if (seen.has(address)) {
       results.push({
         address,
-        symbol,
-        description,
+        ...(symbol !== undefined && { symbol }),
+        ...(description !== undefined && { description }),
         row,
         error: `Row ${row}: duplicate address "${address}"`,
       });
@@ -53,7 +53,12 @@ export function parseAddressList(csv: string): ParsedAddress[] {
     }
 
     seen.add(address);
-    results.push({ address, symbol, description, row });
+    results.push({
+      address,
+      ...(symbol !== undefined && { symbol }),
+      ...(description !== undefined && { description }),
+      row,
+    });
   });
 
   return results;

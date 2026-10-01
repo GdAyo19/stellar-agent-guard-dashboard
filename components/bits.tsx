@@ -92,8 +92,8 @@ export function Stat({
 }: {
   label: string;
   value: ReactNode;
-  note?: ReactNode;
-  tone?: "ok" | "warn" | "danger";
+  note?: ReactNode | undefined;
+  tone?: "ok" | "warn" | "danger" | undefined;
 }) {
   return (
     <div className="stat">
@@ -226,7 +226,7 @@ export interface AmountDisplayProps extends FormatStroopsOptions {
  */
 export function AmountDisplay({ stroops, symbol, decimals }: AmountDisplayProps) {
   const [showRaw, setShowRaw] = useState(false);
-  const human = formatStroopsWithUnit(stroops, { symbol, decimals });
+  const human = formatStroopsWithUnit(stroops, { ...(symbol !== undefined ? { symbol } : {}), ...(decimals !== undefined ? { decimals } : {}) });
   const raw = formatRawStroops(stroops);
   return (
     <button
