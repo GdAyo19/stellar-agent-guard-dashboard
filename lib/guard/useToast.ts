@@ -149,9 +149,12 @@ export function useToast(store: ToastStore = toastStore): UseToast {
   return {
     toasts,
     toast: (input) => store.dispatch(input),
-    success: (title, detail) => store.dispatch({ kind: "success", title, ...(detail !== undefined ? { detail } : {}) }),
-    warning: (title, detail) => store.dispatch({ kind: "warning", title, ...(detail !== undefined ? { detail } : {}) }),
-    info: (title, detail) => store.dispatch({ kind: "info", title, ...(detail !== undefined ? { detail } : {}) }),
+    success: (title, detail) =>
+      store.dispatch({ kind: "success", title, ...(detail !== undefined ? { detail } : {}) }),
+    warning: (title, detail) =>
+      store.dispatch({ kind: "warning", title, ...(detail !== undefined ? { detail } : {}) }),
+    info: (title, detail) =>
+      store.dispatch({ kind: "info", title, ...(detail !== undefined ? { detail } : {}) }),
     error: (title, error, detail) =>
       store.dispatch({ kind: "error", title, error, ...(detail !== undefined ? { detail } : {}) }),
     dismiss: (id) => store.dismiss(id),

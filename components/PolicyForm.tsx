@@ -670,8 +670,8 @@ export function PolicyForm() {
             </p>
             <p className="tiny mono">{describeDraft(draftFromPreset(pendingPreset))}</p>
             <p className="tiny muted">
-              The placeholder asset, recipient and protocol addresses in this preset must be replaced
-              with your own before installing.
+              The placeholder asset, recipient and protocol addresses in this preset must be
+              replaced with your own before installing.
             </p>
             <div className="row">
               <button onClick={() => applyPreset(pendingPreset)}>Replace draft</button>
@@ -720,7 +720,15 @@ function SecurityProfileBadge({ profile }: { profile: SecurityProfile }) {
   );
 }
 
-export function OutcomeBlock({ result, verb, onClose }: { result: InvokeResult; verb: string; onClose?: () => void }) {
+export function OutcomeBlock({
+  result,
+  verb,
+  onClose,
+}: {
+  result: InvokeResult;
+  verb: string;
+  onClose?: () => void;
+}) {
   if (result.kind === "exported") {
     return (
       <div className="modal-backdrop" onClick={onClose}>

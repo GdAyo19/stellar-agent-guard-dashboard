@@ -128,9 +128,11 @@ export async function readPersistentEntry<T = unknown>(
       }),
     );
     const response = await server.getLedgerEntries(key);
-    const entry = response.entries?.[0] as unknown as {
-      val?: { contractData?: { val?: Xdr.ScVal } | (() => { val?: () => Xdr.ScVal }) };
-    } | undefined;
+    const entry = response.entries?.[0] as unknown as
+      | {
+          val?: { contractData?: { val?: Xdr.ScVal } | (() => { val?: () => Xdr.ScVal }) };
+        }
+      | undefined;
     if (!entry?.val) return { ok: true, value: null };
     // The decoded XDR wrapper exposes `contractData` as a plain property in this
     // SDK build, but keep the callable shape working too rather than pinning to
@@ -139,8 +141,7 @@ export async function readPersistentEntry<T = unknown>(
       typeof entry.val.contractData === "function"
         ? entry.val.contractData()
         : entry.val.contractData;
-    const scval =
-      typeof contractData?.val === "function" ? contractData.val() : contractData?.val;
+    const scval = typeof contractData?.val === "function" ? contractData.val() : contractData?.val;
     if (!scval) return { ok: true, value: null };
     return { ok: true, value: scValToNative(scval) as T };
   } catch (error) {

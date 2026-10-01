@@ -226,7 +226,10 @@ export interface AmountDisplayProps extends FormatStroopsOptions {
  */
 export function AmountDisplay({ stroops, symbol, decimals }: AmountDisplayProps) {
   const [showRaw, setShowRaw] = useState(false);
-  const human = formatStroopsWithUnit(stroops, { ...(symbol !== undefined ? { symbol } : {}), ...(decimals !== undefined ? { decimals } : {}) });
+  const human = formatStroopsWithUnit(stroops, {
+    ...(symbol !== undefined ? { symbol } : {}),
+    ...(decimals !== undefined ? { decimals } : {}),
+  });
   const raw = formatRawStroops(stroops);
   return (
     <button

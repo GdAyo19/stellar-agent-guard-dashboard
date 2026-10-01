@@ -60,8 +60,9 @@ function DryRunReport({
 
       {simulation.kind === "refused" ? (
         <p className="tiny">
-          The simulation refused the call, so a real freeze would fail in pre-flight too. Nothing was
-          broadcast. The detail names the stage: <span className="mono">{simulation.detail}</span>
+          The simulation refused the call, so a real freeze would fail in pre-flight too. Nothing
+          was broadcast. The detail names the stage:{" "}
+          <span className="mono">{simulation.detail}</span>
         </p>
       ) : (
         <>
@@ -75,8 +76,8 @@ function DryRunReport({
           </p>
           {simulation.authorizations.length === 0 ? (
             <p className="tiny muted">
-              No separate authorization entries. The wallet&apos;s transaction-envelope signature (not
-              requested in a dry run) would be the only signature needed.
+              No separate authorization entries. The wallet&apos;s transaction-envelope signature
+              (not requested in a dry run) would be the only signature needed.
             </p>
           ) : (
             <ul className="tiny" style={{ margin: "0 0 6px 16px", padding: 0 }}>

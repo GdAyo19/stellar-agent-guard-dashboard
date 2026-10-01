@@ -505,7 +505,9 @@ function addressOfCredential(credentials: xdr.SorobanAddressCredentials): string
 }
 
 /** Classify one recorded authorization into the operator's terms. */
-export function describeAuthorization(entry: xdr.SorobanAuthorizationEntry): SimulatedAuthorization {
+export function describeAuthorization(
+  entry: xdr.SorobanAuthorizationEntry,
+): SimulatedAuthorization {
   const credentials = entry.credentials;
   if (credentials.type === "sorobanCredentialsSourceAccount") {
     return { kind: "source_account", address: null };

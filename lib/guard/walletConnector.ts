@@ -472,7 +472,9 @@ export function createFreighterConnector(
       assertFreighterOk(details, "read the wallet network");
       return normalizeWalletNetwork({
         ...(details.network === undefined ? {} : { name: details.network }),
-        ...(details.networkPassphrase === undefined ? {} : { passphrase: details.networkPassphrase }),
+        ...(details.networkPassphrase === undefined
+          ? {}
+          : { passphrase: details.networkPassphrase }),
       });
     },
     async signTransaction(transactionXdr, options) {
@@ -518,9 +520,15 @@ export function createXbullConnector(provider: XbullProvider | null): WalletConn
       try {
         const connected = await wallet.connect();
         const address =
-          typeof connected === "string" ? connected : requireAddress(connected.publicKey ?? connected.address, id);
+          typeof connected === "string"
+            ? connected
+            : requireAddress(connected.publicKey ?? connected.address, id);
         const network = normalizeWalletNetwork(
-          typeof connected === "string" ? { name: null } : connected.network === undefined ? {} : { name: connected.network },
+          typeof connected === "string"
+            ? { name: null }
+            : connected.network === undefined
+              ? {}
+              : { name: connected.network },
         );
         return { address, network: network.passphrase ? network : await this.getNetwork() };
       } catch (error) {
